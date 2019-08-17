@@ -13,7 +13,8 @@
 - [x] Add Map
 - [ ] Center map to contain all the currently loaded events
 - [ ] Add Event List
-- [ ] Add markers to the map
+- [x] Add markers to the map
+- [ ] Make markers and event list icons and colors correspond
 - [ ] Add map event detail
 
 

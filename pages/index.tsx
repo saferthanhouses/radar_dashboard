@@ -3,6 +3,7 @@ import * as Styles from '../styles'
 import fetch from 'isomorphic-unfetch';
 import {EventFactory} from "../models/Event";
 import dynamic from 'next/dynamic'
+import EventsList from "../components/EventsList";
 
 // Need to disable SSR for the map so we don't try to access the browser window on the server
 const MapNoSSR = dynamic(
@@ -16,6 +17,7 @@ function Dashboard({events}){
         <div>
             <CustomHead/>
             <MapNoSSR events={events}/>
+            <EventsList events={events}/>
         </div>
     )
 }
