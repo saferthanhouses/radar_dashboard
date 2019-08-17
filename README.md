@@ -3,8 +3,11 @@
 - [x] Add style constants
 - [x] Add app wide styles
 - [ ] Add layout component
+- [x] Create Data Types for event and stubs for other data types
+- [ ] Add loading & error components
+- [ ] Create Events Repository
+- [ ] Create EventsApi Repository
 - [ ] Fetch event data
-- [ ] Create Model for event type
 - [ ] Add enum for event types
 - [ ] Add Mapbox Library
 - [ ] Add Map
