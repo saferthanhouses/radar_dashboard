@@ -1,6 +1,8 @@
 import {Component} from 'react';
 import ReactMapGL, {Marker} from 'react-map-gl';
 import Event from '../models/Event';
+import MAP_STYLE from '../map-style.json';
+
 
 interface MapProps {
     events : Array<Event>
@@ -15,6 +17,8 @@ interface MapState {
         zoom: number
     }
 }
+
+import {fromJS} from 'immutable';
 
 export default class Map extends Component<MapProps, MapState> {
     constructor(props: MapProps) {
@@ -33,6 +37,47 @@ export default class Map extends Component<MapProps, MapState> {
         this.updateMapViewport = this.updateMapViewport.bind(this);
     }
 
+    /**
+     *
+     * We add the events as a layer to the map - this is MUCH more performant than adding to the DOM tree
+     *
+     */
+
+    updateMapStyle(events: Array<Event>){
+        let styleObj = {
+            ...MAP_STYLE,
+            sources: {
+                ...MAP_STYLE.sources,
+                events: {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                        ]
+                    }
+                },
+            },
+            layers: [
+                ...MAP_STYLE.layers,
+                {
+                    id: 'events-layer',
+                    type: 'circle',
+                    source: 'events',
+                    paint: {
+                        'circle-color': '#f00',
+                        'circle-radius': 4
+                    },
+                }
+            ],
+        };
+
+        styleObj.sources.events.data.features = events.map( event => ({
+            type: 'Feature', geometry: {type: 'Point', coordinates: [event.location.longitude, event.location.latitude]}
+        }));
+
+        return fromJS(styleObj)
+
+    }
 
     updateMapViewport(){
         window.addEventListener('resize', ()=>{
@@ -55,35 +100,14 @@ export default class Map extends Component<MapProps, MapState> {
     }
 
     render() {
-        const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
-  c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
-  C20.1,15.8,20.2,15.8,20.2,15.7z`;
-
-        const pinStyle = {
-            cursor: 'pointer',
-            fill: '#d00',
-            stroke: 'none'
-        };
+        let mapStyle = this.updateMapStyle(this.props.events);
         return (
             <ReactMapGL
                 {...this.state.viewport}
+                mapStyle={mapStyle}
                 mapboxApiAccessToken={'pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ'}
                 onViewportChange={(viewport) => this.setState({viewport})}
             >
-                {this.props.events.map( event => (
-                    <Marker latitude={event.location.latitude} longitude={event.location.longitude}>
-                        <svg
-                            height={20}
-                            viewBox="0 0 24 24"
-                            style={{
-                                ...pinStyle,
-                                transform: `translate(${-20 / 2}px,${-20}px)`
-                            }}
-                        >
-                            <path d={ICON} />
-                        </svg>
-                    </Marker>
-                ))}
             </ReactMapGL>
         );
     }
