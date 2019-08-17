@@ -1,4 +1,13 @@
+import CustomHead from "../components/CustomHead";
+import * as Styles from '../styles'
 
-const Home = () => <h1>Hello world!</h1>;
+function Dashboard(){
+    return (
+        <div style={{padding: Styles.defaultPadding}}>
+            <CustomHead/>
+            <h1>Welcome To The Events Dashboard</h1>
+        </div>
+    )
+}
 
-export default Home;
+export default Dashboard;
