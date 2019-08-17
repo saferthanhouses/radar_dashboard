@@ -18,6 +18,8 @@ const CustomHead = () => (
                     color: ${Styles.textColorLight};
                     font-family: ${Styles.primaryFontFamily};
                     font-size: ${Styles.primaryFontSize};
+                    padding: 0px;
+                    margin: 0px;
                 }
             `}
         </style>
