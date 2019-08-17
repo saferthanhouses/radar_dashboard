@@ -1,7 +1,7 @@
 import User from "./User";
 import Geofence from "./Geofence";
 import Place from "./Place";
-import {GeoJSON} from "./GeoJSON";
+import {Point} from "./Point";
 
 export enum EventType {
     entered_geofence,
@@ -12,7 +12,7 @@ export enum EventType {
 
 export default class Event {
     constructor(
-        private _id: string,
+        public _id: string,
         public createdAt: Date,
         private live : boolean,
         private type: EventType,
@@ -21,7 +21,7 @@ export default class Event {
         private place: Place,
         private alternatePlaces: Array<Place>,
         private verifiedPlace: Place,
-        private location: GeoJSON,
+        public location: Point,
         private locationAccuracy: number,
         private confidence: number,
         private duration: number,
@@ -46,7 +46,7 @@ export class EventFactory {
     private  place : Place;
     private  alternatePlaces : Array<Place>;
     private  verifiedPlace  : Place;
-    private  location : GeoJSON;
+    private  location : Point;
     private  locationAccuracy : number;
     private  confidence : number;
     private  duration : number;
@@ -74,7 +74,11 @@ export class EventFactory {
 
     setVerifiedPlace(verifiedPlace : Place){ this.verifiedPlace = verifiedPlace; return this; }
 
-    setLocation(location: GeoJSON) { this.location = location; return this; }
+    setLocation(location: {coordinates: [number, number]}) {
+        let locationPoint = new Point(location.coordinates[1],location.coordinates[0]);
+        this.location = locationPoint;
+        return this;
+    }
 
     setLocationAccuracy(accuracy : number) { this.locationAccuracy = accuracy; return this; }
 
