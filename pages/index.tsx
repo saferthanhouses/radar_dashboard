@@ -2,21 +2,26 @@ import CustomHead from "../components/CustomHead";
 import * as Styles from '../styles'
 import fetch from 'isomorphic-unfetch';
 import {EventFactory} from "../models/Event";
+import dynamic from 'next/dynamic'
+
+// Need to disable SSR for the map so we don't try to access the browser window on the server
+const MapNoSSR = dynamic(
+    () => import('../components/Map'),
+    { ssr: false }
+)
+
 
 function Dashboard({events}){
     return (
-        <div style={{padding: Styles.defaultPadding}}>
+        <div>
             <CustomHead/>
-            <h1>Welcome To The Events Dashboard</h1>
-            { events.map( event => (
-                <div>{event._id}</div>
-            )) }
+            <MapNoSSR events={events}/>
         </div>
     )
 }
 
 // @ts-ignore
-Dashboard.getInitsialProps = async function() : Promise<{ events: Array<Event> }> {
+Dashboard.getInitialProps = async function() : Promise<{ events: Array<Event>, loading: boolean, error: boolean }> {
     try {
         let res = await fetch('https://api.radar.io/v1/events', {
             headers: {
@@ -25,12 +30,19 @@ Dashboard.getInitsialProps = async function() : Promise<{ events: Array<Event> }
             },
         });
 
-        let { events }= await res.json();
+        let { events } = await res.json();
+
         return {
-            events: events.map(EventFactory.fromJSON)
+            events: events.map(EventFactory.fromJSON),
+            loading: false,
+            error: false
         }
     } catch (error){
-        console.log("error", error);
+        return {
+            events: [],
+            loading: false,
+            error: true
+        }
     }
 };
 
