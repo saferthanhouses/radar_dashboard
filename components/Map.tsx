@@ -1,11 +1,11 @@
 import {Component} from 'react';
 import ReactMapGL, {Marker} from 'react-map-gl';
-import Event from '../models/Event';
+import LocationEvent from '../models/LocationEvent';
 import MAP_STYLE from '../map-style.json';
 
 
 interface MapProps {
-    events : Array<Event>
+    events : Array<LocationEvent>
 }
 
 interface MapState {
@@ -43,7 +43,7 @@ export default class Map extends Component<MapProps, MapState> {
      *
      */
 
-    updateMapStyle(events: Array<Event>){
+    updateMapStyle(events: Array<LocationEvent>){
         let styleObj = {
             ...MAP_STYLE,
             sources: {

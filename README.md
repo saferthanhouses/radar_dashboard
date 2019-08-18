@@ -7,14 +7,13 @@
 - [x] Add enum for event types
 - [ ] Add loading & error components
 - [ ] Create Events Repository
-- [ ] Create EventsApi Repository
 - [x] Fetch event data
 - [x] Add Mapbox Library
 - [x] Add Map
-- [ ] Center map to contain all the currently loaded events
-- [ ] Add Event List
+- [x] Add LocationEvent List
 - [x] Add markers to the map
 - [ ] Make markers and event list icons and colors correspond
+- [ ] Center map to contain all the currently loaded events
 - [ ] Add map event detail
 
 

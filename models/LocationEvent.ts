@@ -2,20 +2,23 @@ import User from "./User";
 import Geofence from "./Geofence";
 import Place from "./Place";
 import {Point} from "./Point";
+import {padTwo} from "../utils";
 
 export enum EventType {
-    entered_geofence,
-    exited_geofence,
-    entered_place,
-    exited_place
+    'user.entered_geofence',
+    'user.exited_geofence',
+    'user.entered_place',
+    'user.exited_place'
 }
 
-export default class Event {
+export default class LocationEvent {
+    private _shortTime: string;
+
     constructor(
         public _id: string,
         public createdAt: Date,
         private live : boolean,
-        private type: EventType,
+        public type: EventType,
         private user: User,
         private geofence: Geofence,
         private place: Place,
@@ -26,13 +29,29 @@ export default class Event {
         private confidence: number,
         private duration: number,
         private verification: number,
-    ) {}
+    ) {
+        this._shortTime = this._createShortTime();
+    }
+
+    public getShortTime() : string {
+        return this._shortTime;
+    }
+
+    private _createShortTime() : string {
+        return padTwo(this.createdAt.getMonth()) + '/'
+            + padTwo(this.createdAt.getDate()) + '/'
+            + this.createdAt.getFullYear() + ' '
+            + padTwo(this.createdAt.getHours()) + ':'
+            + padTwo(this.createdAt.getMinutes()) + ':'
+            + padTwo(this.createdAt.getSeconds());
+    }
+
 }
 
 /**
  *
  * EventFactory is responsible for checking the fields from the responses,
- * transforming data and creating correct Event instances
+ * transforming data and creating correct LocationEvent instances
  *
  */
 
@@ -54,7 +73,10 @@ export class EventFactory {
 
     setId(id: string) { this._id = id; return this; }
 
-    setCreatedAt(createdAt: string){ this.createdAt = new Date(createdAt); return this; }
+    setCreatedAt(createdAt: string){
+        this.createdAt = new Date(createdAt);
+        return this;
+    }
 
     setLive(live: boolean){ this.live = live; return this; }
 
@@ -89,7 +111,7 @@ export class EventFactory {
     setVerification(verification : number){ this.verification = verification; return this; }
 
     createEvent(){
-        return new Event(
+        return new LocationEvent(
             this._id,
             this.createdAt,
             this.live,
@@ -107,7 +129,7 @@ export class EventFactory {
         );
     }
 
-    static fromJSON(eventObj) : Event {
+    static fromJSON(eventObj) : LocationEvent {
         let eventFactory = new EventFactory();
         return eventFactory.setId(eventObj._id)
             .setCreatedAt(eventObj.createdAt)

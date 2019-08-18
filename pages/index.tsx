@@ -1,7 +1,6 @@
 import CustomHead from "../components/CustomHead";
-import * as Styles from '../styles'
 import fetch from 'isomorphic-unfetch';
-import {EventFactory} from "../models/Event";
+import {EventFactory} from "../models/LocationEvent";
 import dynamic from 'next/dynamic'
 import EventsList from "../components/EventsList";
 
@@ -11,13 +10,16 @@ const MapNoSSR = dynamic(
     { ssr: false }
 )
 
-
 function Dashboard({events}){
+    // Data that is fetched in getInitialProps is JSONified during SSR and sent directly to the client - so we lose
+    // our classes - which is why we're parsing the data here.
+    let eventsParsed = events.map(EventFactory.fromJSON);
+
     return (
         <div>
             <CustomHead/>
-            <MapNoSSR events={events}/>
-            <EventsList events={events}/>
+            <MapNoSSR events={eventsParsed}/>
+            <EventsList events={eventsParsed}/>
         </div>
     )
 }
@@ -35,7 +37,7 @@ Dashboard.getInitialProps = async function() : Promise<{ events: Array<Event>, l
         let { events } = await res.json();
 
         return {
-            events: events.map(EventFactory.fromJSON),
+            events: events,
             loading: false,
             error: false
         }

@@ -21,6 +21,40 @@ const CustomHead = () => (
                     padding: 0px;
                     margin: 0px;
                 }
+
+                p, h1, h2, h3, h4 {
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .row {
+                    display: flex;
+                    flex-direction: row;
+                }
+
+                .column {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .align-center {
+                    align-items: center;
+                }
+
+                .icon {
+                    width: 42px;
+                    height: 42px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border-radius: 50%;
+                    background: white;
+                }
+
+                .icon svg {
+                    height: 18px;
+                    width: 18px;
+                }
             `}
         </style>
     </div>

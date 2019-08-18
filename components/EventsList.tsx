@@ -1,5 +1,5 @@
 import {Component} from "react";
-import Event from '../models/Event';
+import LocationEvent from '../models/LocationEvent';
 import EventsListItem from './EventsListItem';
 import * as Styles from '../styles';
 
@@ -7,7 +7,7 @@ interface EventsListState {
 }
 
 interface EventsListProps {
-    events: Array<Event>
+    events: Array<LocationEvent>
 }
 
 export default class EventsList extends Component<EventsListProps, EventsListState> {
@@ -33,15 +33,20 @@ export default class EventsList extends Component<EventsListProps, EventsListSta
                         left: 2rem;
                         max-height: calc(100% - 6rem);
                         background-color: ${Styles.whiteColor};
-                        box-shadow: ${Styles.boxShadowLight};
+                        box-shadow: ${Styles.boxShadowRegular};
                         display: flex;
                         flex-direction: column;
+                        min-width: 320px;
                     }
 
                     div.events-list-header {
                         background-color: ${Styles.primaryAccent};
                         display: flex;
                         padding: 0 1rem;
+                    }
+
+                    div.events-list-header h3 {
+                        margin: 1rem 0.5rem;
                     }
 
                     div.events-list-header h3 {
@@ -54,7 +59,9 @@ export default class EventsList extends Component<EventsListProps, EventsListSta
                     }
 
                     div.events-list-inner {
-                        padding: 0 1rem;
+                        display: flex;
+                        flex-direction: column;
+                        padding: 0.5rem;
                     }
 
                 `}</style>
