@@ -37,6 +37,10 @@ export default class LocationEvent {
         return this._shortTime;
     }
 
+    public getTypeString() : string {
+        return EventType[this.type];
+    }
+
     private _createShortTime() : string {
         return padTwo(this.createdAt.getMonth()) + '/'
             + padTwo(this.createdAt.getDate()) + '/'
@@ -45,7 +49,6 @@ export default class LocationEvent {
             + padTwo(this.createdAt.getMinutes()) + ':'
             + padTwo(this.createdAt.getSeconds());
     }
-
 }
 
 /**

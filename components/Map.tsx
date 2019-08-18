@@ -1,11 +1,16 @@
 import {Component} from 'react';
-import ReactMapGL, {Marker} from 'react-map-gl';
+import ReactMapGL, {FlyToInterpolator} from 'react-map-gl';
 import LocationEvent from '../models/LocationEvent';
 import MAP_STYLE from '../map-style.json';
+import {fromJS} from 'immutable';
+import * as Styles from '../styles'
+import * as React from "react";
 
 
 interface MapProps {
     events : Array<LocationEvent>
+    selected: LocationEvent;
+    onEventSelected : any
 }
 
 interface MapState {
@@ -18,9 +23,8 @@ interface MapState {
     }
 }
 
-import {fromJS} from 'immutable';
-
 export default class Map extends Component<MapProps, MapState> {
+
     constructor(props: MapProps) {
         super(props);
         this.state = {
@@ -35,6 +39,8 @@ export default class Map extends Component<MapProps, MapState> {
         };
 
         this.updateMapViewport = this.updateMapViewport.bind(this);
+        this.onMapClick = this.onMapClick.bind(this);
+        this.onViewportChange = this.onViewportChange.bind(this)
     }
 
     /**
@@ -52,27 +58,92 @@ export default class Map extends Component<MapProps, MapState> {
                     type: 'geojson',
                     data: {
                         type: 'FeatureCollection',
-                        features: [
-                        ]
+                        features: []
                     }
                 },
             },
             layers: [
                 ...MAP_STYLE.layers,
                 {
+                    id: 'events-shadow-layer',
+                    type: 'circle',
+                    source: 'events',
+                    paint: {
+                        'circle-color': 'rgba(0,0,0,0.35)',
+                        'circle-pitch-alignment': 'map',
+                        'circle-blur': 0.5,
+                        'circle-radius': [
+                            "interpolate",
+                            ["linear"],
+                            ["zoom"],
+                            1,
+                            4,
+                            12,
+                            12,
+                            18,
+                            58,
+                            22,
+                            120
+                        ]
+                    },
+                },
+                {
+                    id: 'events-background-layer',
+                    type: 'circle',
+                    source: 'events',
+                    paint: {
+                        'circle-color': 'white',
+                        'circle-pitch-alignment': 'map',
+                        'circle-radius': [
+                            "interpolate",
+                            ["linear"],
+                            ["zoom"],
+                            1,
+                            4,
+                            12,
+                            11,
+                            18,
+                            54,
+                            22,
+                            110
+                        ]
+                    },
+                },
+                {
                     id: 'events-layer',
                     type: 'circle',
                     source: 'events',
                     paint: {
-                        'circle-color': '#f00',
-                        'circle-radius': 4
+                        'circle-color': ['get', 'color'],
+                        'circle-pitch-alignment': 'map',
+                        'circle-radius': [
+                            "interpolate",
+                            ["linear"],
+                            ["zoom"],
+                            1,
+                            3,
+                            12,
+                            10,
+                            18,
+                            50,
+                            22,
+                            100
+                        ]
                     },
-                }
+                },
             ],
         };
 
         styleObj.sources.events.data.features = events.map( event => ({
-            type: 'Feature', geometry: {type: 'Point', coordinates: [event.location.longitude, event.location.latitude]}
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [event.location.longitude, event.location.latitude]
+            },
+            properties: {
+                color: Styles.eventColors[event.getTypeString()],
+                id: event._id
+            }
         }));
 
         return fromJS(styleObj)
@@ -91,6 +162,35 @@ export default class Map extends Component<MapProps, MapState> {
         })
     }
 
+    onViewportChange = viewport =>
+        this.setState({
+            viewport: {...this.state.viewport, ...viewport}
+        });
+
+    onMapClick(e){
+        let clickedEvents = e.features.filter( (feature) => !!feature.properties.id);
+        if (clickedEvents.length){
+            let selectedEvent = this.props.events.filter( (event) =>
+                event._id === clickedEvents[0].properties.id)[0];
+
+            this.props.onEventSelected(selectedEvent);
+        }
+    }
+
+    componentWillReceiveProps(props: MapProps){
+        this.goToEvent(props.selected);
+    }
+
+    goToEvent = (event : LocationEvent) => {
+        this.onViewportChange({
+            longitude: event.location.longitude,
+            latitude: event.location.latitude,
+            zoom: 17,
+            transitionInterpolator: new FlyToInterpolator(),
+            transitionDuration: 800
+        });
+    };
+
     componentDidMount(){
         window.addEventListener('resize', this.updateMapViewport)
     }
@@ -100,13 +200,18 @@ export default class Map extends Component<MapProps, MapState> {
     }
 
     render() {
-        let mapStyle = this.updateMapStyle(this.props.events);
+        let mapStyle = this.props.events.length ?
+            this.updateMapStyle(this.props.events) :
+            [];
+
+        // With more time would separate the configuration (auth token) and the code
         return (
             <ReactMapGL
                 {...this.state.viewport}
                 mapStyle={mapStyle}
                 mapboxApiAccessToken={'pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ'}
-                onViewportChange={(viewport) => this.setState({viewport})}
+                onViewportChange={this.onViewportChange}
+                onClick={this.onMapClick}
             >
             </ReactMapGL>
         );
