@@ -1,6 +1,7 @@
+import {Component} from "react";
 import CustomHead from "../components/CustomHead";
 import fetch from 'isomorphic-unfetch';
-import {EventFactory} from "../models/LocationEvent";
+import LocationEvent, {EventFactory} from "../models/LocationEvent";
 import dynamic from 'next/dynamic'
 import EventsList from "../components/EventsList";
 
@@ -8,46 +9,75 @@ import EventsList from "../components/EventsList";
 const MapNoSSR = dynamic(
     () => import('../components/Map'),
     { ssr: false }
-)
+);
 
-function Dashboard({events}){
-    // Data that is fetched in getInitialProps is JSONified during SSR and sent directly to the client - so we lose
-    // our classes - which is why we're parsing the data here.
-    let eventsParsed = events.map(EventFactory.fromJSON);
-
-    return (
-        <div>
-            <CustomHead/>
-            <MapNoSSR events={eventsParsed}/>
-            <EventsList events={eventsParsed}/>
-        </div>
-    )
+interface MapProps {
+    events: Array<LocationEvent>;
 }
 
-// @ts-ignore
-Dashboard.getInitialProps = async function() : Promise<{ events: Array<Event>, loading: boolean, error: boolean }> {
-    try {
-        let res = await fetch('https://api.radar.io/v1/events', {
-            headers: {
-                'Authorization': 'org_test_sk_ec28329d6943dd4c0f663814570569b4470c03d9',
-                'Content-Type': 'application/json'
-            },
-        });
+interface MapState {
+    selected: LocationEvent;
+}
 
-        let { events } = await res.json();
-
-        return {
-            events: events,
-            loading: false,
-            error: false
-        }
-    } catch (error){
-        return {
-            events: [],
-            loading: false,
-            error: true
-        }
+export default class Dashboard extends Component<MapProps, MapState> {
+    constructor(props: MapProps){
+        super(props);
+        this.state = {
+            selected: null,
+        };
+        this.setSelectedEvent = this.setSelectedEvent.bind(this);
     }
-};
 
-export default Dashboard;
+    static getInitialProps = async function() : Promise<{ events: Array<Event>, loading: boolean, error: boolean }> {
+        try {
+            let res = await fetch('https://api.radar.io/v1/events', {
+                headers: {
+                    'Authorization': 'org_test_sk_ec28329d6943dd4c0f663814570569b4470c03d9',
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            let { events } = await res.json();
+
+            return {
+                events: events,
+                loading: false,
+                error: false
+            }
+        } catch (error){
+            return {
+                events: [],
+                loading: false,
+                error: true
+            }
+        }
+    };
+
+    setSelectedEvent(event : LocationEvent){
+        this.setState({selected: event})
+    }
+
+    render(){
+        // Data that is fetched in getInitialProps is JSONified during SSR and sent directly to the client - so we lose
+        // our classes - which is why we're parsing the data here.
+        let eventsParsed = this.props.events.map(EventFactory.fromJSON);
+
+        return (
+            <div>
+                <CustomHead/>
+                <MapNoSSR
+                    events={eventsParsed}
+                    selected={this.state.selected}
+                    onEventSelected={this.setSelectedEvent}
+                />
+                <EventsList
+                    events={eventsParsed}
+                    selected={this.state.selected}
+                    onEventSelected={this.setSelectedEvent}
+                />
+            </div>
+        )
+    }
+}
+
+

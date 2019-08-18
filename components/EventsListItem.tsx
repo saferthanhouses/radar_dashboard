@@ -3,6 +3,15 @@ import * as Styles from '../styles';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faSignOutAlt, faSignInAlt} from "@fortawesome/pro-regular-svg-icons";
 import {faMapMarkerAlt, faMapMarkerAltSlash} from "@fortawesome/pro-solid-svg-icons"
+import {Component} from "react";
+import * as React from "react";
+
+interface EventsListItemProps {
+    event: LocationEvent;
+    selected: boolean;
+    onEventSelected : any;
+    scrollToItem : any;
+}
 
 const getEventTypeIcon = (eventType : EventType) : any => {
     switch (eventType){
@@ -17,29 +26,45 @@ const getEventTypeIcon = (eventType : EventType) : any => {
     }
 };
 
-export default function EventsListItem(props: {event: LocationEvent}){
-    const eventName = EventType[props.event.type];
-    return (
-        <div className={"event-list-item"} key={props.event._id}>
-            <div>
-                <div className={"row align-center top"}>
-                    <div className={"icon"}>
-                        <FontAwesomeIcon icon={getEventTypeIcon(props.event.type)}/>
+export default class EventsListItem extends Component<EventsListItemProps> {
+    private listItemRef: React.RefObject<any>;
+
+    constructor(props: EventsListItemProps){
+        super(props);
+        this.listItemRef = React.createRef();
+    }
+
+    render(){
+        let {event, selected, scrollToItem} = this.props;
+
+        if (selected) scrollToItem(this.listItemRef.current);
+
+        let className = "event-list-item";
+        if (selected){
+            className += " selected"
+        }
+
+        return (
+            <div ref={this.listItemRef} className={className} key={event._id} onClick={()=>this.props.onEventSelected(event)}>
+                <div>
+                    <div className={"row align-center top"}>
+                        <div className={"icon"}>
+                            <FontAwesomeIcon icon={getEventTypeIcon(event.type)}/>
+                        </div>
+                        <p className={"event-name"}>{event.getTypeString()}</p>
+                        <p className={"time-container"}><time>{event.getShortTime()}</time></p>
                     </div>
-                    <p className={"event-name"}>{eventName}</p>
-                    <p className={"time-container"}><time>{props.event.getShortTime()}</time></p>
                 </div>
-            </div>
-            <style jsx>{`
+                <style jsx>{`
                 .event-list-item {
-                    padding: 0.25rem 0.5rem;
+                    padding: 0.35rem 0.7rem;
                     margin: 0.25rem;
                     background-color: white;
                     cursor: pointer;
-                    transition: 0.22s ease-in-out box-shadow, 0.22s ease-in-out transform;
+                    transition: 0.32s ease-in-out box-shadow, 0.32s ease-in-out transform;
                 }
 
-                .event-list-item:hover {
+                .event-list-item:hover, .event-list-item.selected {
                     box-shadow: ${Styles.boxShadowRegular};
                     transform: translateY(-1px);
                 }
@@ -57,7 +82,7 @@ export default function EventsListItem(props: {event: LocationEvent}){
                 }
 
                 .icon {
-                    background: ${Styles.eventColors[eventName]};
+                    background: ${Styles.eventColors[event.getTypeString()]};
                 }
 
                 .event-name {
@@ -68,6 +93,7 @@ export default function EventsListItem(props: {event: LocationEvent}){
                 }
 
             `}</style>
-        </div>
-    )
+            </div>
+        )
+    }
 }
