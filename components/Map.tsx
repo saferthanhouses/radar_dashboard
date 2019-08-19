@@ -1,6 +1,7 @@
 import {Component} from 'react';
 import ReactMapGL, {FlyToInterpolator} from 'react-map-gl';
 import LocationEvent from '../models/LocationEvent';
+// @ts-ignore
 import MAP_STYLE from '../map-style.json';
 import {fromJS} from 'immutable';
 import * as Styles from '../styles'
@@ -32,15 +33,50 @@ export default class Map extends Component<MapProps, MapState> {
                 width: window.innerWidth,
                 height: window.innerHeight,
 
+                // TODO: replace the hardcoded bounding box with a viewport bounding box transition when the events load
                 latitude: 40.7591704,
                 longitude: -74.0392706,
                 zoom: 8
             }
         };
 
-        this.updateMapViewport = this.updateMapViewport.bind(this);
+        this.resizeMapViewport = this.resizeMapViewport.bind(this);
         this.onMapClick = this.onMapClick.bind(this);
         this.onViewportChange = this.onViewportChange.bind(this)
+    }
+
+    /**
+     * Add and remove window event listeners when the component is created and destroyed to prevent memory leaks
+     */
+
+    componentDidMount(){
+        window.addEventListener('resize', this.resizeMapViewport)
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener('resize', this.resizeMapViewport)
+    }
+
+    componentDidUpdate(prevProps : MapProps){
+        if (this.props.selected && prevProps.selected &&
+            this.props.selected._id !== prevProps.selected._id){
+            this.goToEvent(this.props.selected);
+        }
+    }
+
+    resizeMapViewport(){
+        window.addEventListener('resize', ()=>{
+            this.onViewportChange({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        })
+    }
+
+    onViewportChange(viewport) {
+        this.setState({
+            viewport: {...this.state.viewport, ...viewport}
+        });
     }
 
     /**
@@ -150,23 +186,6 @@ export default class Map extends Component<MapProps, MapState> {
 
     }
 
-    updateMapViewport(){
-        window.addEventListener('resize', ()=>{
-            this.setState((state, props) => ({
-                viewport: {
-                    ...state.viewport,
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                }
-            }));
-        })
-    }
-
-    onViewportChange = viewport =>
-        this.setState({
-            viewport: {...this.state.viewport, ...viewport}
-        });
-
     onMapClick(e){
         let clickedEvents = e.features.filter( (feature) => !!feature.properties.id);
         if (clickedEvents.length){
@@ -175,10 +194,6 @@ export default class Map extends Component<MapProps, MapState> {
 
             this.props.onEventSelected(selectedEvent);
         }
-    }
-
-    componentWillReceiveProps(props: MapProps){
-        this.goToEvent(props.selected);
     }
 
     goToEvent = (event : LocationEvent) => {
@@ -191,18 +206,9 @@ export default class Map extends Component<MapProps, MapState> {
         });
     };
 
-    componentDidMount(){
-        window.addEventListener('resize', this.updateMapViewport)
-    }
-
-    componentWillUnmount(){
-        window.removeEventListener('resize', this.updateMapViewport)
-    }
-
     render() {
-        let mapStyle = this.props.events.length ?
-            this.updateMapStyle(this.props.events) :
-            [];
+
+        let mapStyle = this.updateMapStyle(this.props.events);
 
         // With more time would separate the configuration (auth token) and the code
         return (
@@ -210,7 +216,7 @@ export default class Map extends Component<MapProps, MapState> {
                 {...this.state.viewport}
                 mapStyle={mapStyle}
                 mapboxApiAccessToken={'pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ'}
-                onViewportChange={this.onViewportChange}
+                onViewportChange={(viewport) => this.setState({viewport})}
                 onClick={this.onMapClick}
             >
             </ReactMapGL>

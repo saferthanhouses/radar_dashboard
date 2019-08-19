@@ -34,10 +34,16 @@ export default class EventsListItem extends Component<EventsListItemProps> {
         this.listItemRef = React.createRef();
     }
 
-    render(){
-        let {event, selected, scrollToItem} = this.props;
+    componentDidUpdate(prevProps : EventsListItemProps){
+        if (this.props.selected && !prevProps.selected){
+            this.props.scrollToItem(this.listItemRef.current);
+        }
+    }
 
-        if (selected) scrollToItem(this.listItemRef.current);
+    render(){
+        let {event, selected} = this.props;
+
+        // if (selected) scrollToItem(this.listItemRef.current);
 
         let className = "event-list-item";
         if (selected){
@@ -45,7 +51,7 @@ export default class EventsListItem extends Component<EventsListItemProps> {
         }
 
         return (
-            <div ref={this.listItemRef} className={className} key={event._id} onClick={()=>this.props.onEventSelected(event)}>
+            <div ref={this.listItemRef} className={className} onClick={()=>this.props.onEventSelected(event)}>
                 <div>
                     <div className={"row align-center top"}>
                         <div className={"icon"}>

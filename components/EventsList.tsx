@@ -63,6 +63,7 @@ export default class EventsList extends Component<EventsListProps, EventsListSta
                     <div className={"events-list-inner"}>
                         {this.props.events.map((event) =>
                             <EventsListItem
+                                key={event._id}
                                 event={event}
                                 selected={this.props.selected && this.props.selected._id === event._id}
                                 onEventSelected={this.props.onEventSelected}
