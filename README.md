@@ -55,7 +55,7 @@ maps within a limited time scope.
 #### Next Steps
 Finally, I wanted to implement an event detail view in which you would be able to view the details of the event and the related entities 
 (users, geofences, places) and then apply filters the event list and the map based on selected entities - for example filtering all events relating to 
-a certain geofence. While this would have been fun and given this project some added fun, this would have taken me over 'several hours' of work and I didn't want to 
+a certain geofence. While this would have been fun and given this project some extra color, this would have taken me over 'several hours' of work and I didn't want to 
 be disingenuous and present it as such.
 
 I hope you feel that, while not the fanciest of visualisations, this is a well designed, performant application in which I demonstrate conscientious 
