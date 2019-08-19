@@ -1,5 +1,14 @@
 ## Product Engineer (web) homework - Joe Oliver
 
+#### Install Instructions
+
+`=> npm install`
+`=> npm run start`
+
+#### Live Link
+
+Live version deployed [here](https://productengineerhomework.joeyoliver.now.sh )
+
 #### Super Quick Wireframes:
 ![wireframe](./wireframe.png)
 

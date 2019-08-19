@@ -1,8 +1,8 @@
 import LocationEvent, {EventType} from '../models/LocationEvent';
 import * as Styles from '../styles';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faSignOutAlt, faSignInAlt} from "@fortawesome/pro-regular-svg-icons";
-import {faMapMarkerAlt, faMapMarkerAltSlash} from "@fortawesome/pro-solid-svg-icons"
+import {faSignOutAlt, faSignInAlt} from "@fortawesome/free-solid-svg-icons";
+import {faMapMarkerAlt, faMapMarked} from "@fortawesome/free-solid-svg-icons"
 import {Component} from "react";
 import * as React from "react";
 
@@ -22,7 +22,7 @@ const getEventTypeIcon = (eventType : EventType) : any => {
         case EventType["user.exited_geofence"]:
             return faSignOutAlt;
         case EventType["user.exited_place"]:
-            return faMapMarkerAltSlash;
+            return faMapMarked;
     }
 };
 
